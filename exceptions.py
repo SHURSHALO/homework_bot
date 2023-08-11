@@ -4,19 +4,13 @@ class SendMessageTelegramError(Exception):
     pass
 
 
-class ConnectionError(Exception):
-    """Ошибка соединения."""
-
-    pass
-
-
 class RequestError(Exception):
     """Ошибка при запросе к API."""
 
     pass
 
 
-class RequestException(Exception):
-    """Ошибка при запросе к основному API."""
+class AbsentAPI(Exception):
+    """Не хватает глобаной переменной."""
 
     pass
