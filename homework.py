@@ -29,9 +29,12 @@ HOMEWORK_VERDICTS: Dict[str, str] = {
 def check_tokens() -> bool:
     """Проверяет наличие необходимых токенов в переменных окружения."""
     required_tokens = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    if not all(required_tokens):
-        logging.critical('Не хватает глобаной переменной')
-        raise exceptions.AbsentAPI('Не хватает глобаной переменной')
+    for token in required_tokens:
+        if not token:
+            logging.critical(
+                f"Следующие переменные окружения отсутствуют:\n- {token}"
+            )
+            raise exceptions.AbsentAPI('Не хватает глобаной переменной')
 
     return True
 
