@@ -1,9 +1,9 @@
 import os
 import time
 import logging
+from http import HTTPStatus
 from typing import Dict, List, Any
 
-from http import HTTPStatus
 from dotenv import load_dotenv
 import telegram
 import requests
@@ -41,10 +41,8 @@ def check_tokens() -> bool:
 
 def send_message(bot: telegram.Bot, message: str) -> None:
     """Отправляет сообщение в чат Телеграма."""
-    chat_id = os.getenv('TELEGRAM_CHAT_ID')
-
     try:
-        bot.send_message(chat_id=chat_id, text=message)
+        bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         logging.debug('Сообщение успешно отправлено в Telegram.')
     except Exception as error:
         error_message = f'Ошибка при отправке сообщения в Telegram: {error}'
@@ -84,21 +82,23 @@ def check_response(response: Dict[str, Any]) -> List[Dict[str, Any]]:
         raise TypeError('Данные по домашке не список словарей')
     if 'current_date' not in response:
         raise TypeError('Отсутствует дата текущего запроса')
+    if len(homework) == 0:
+        raise ValueError('Список домашек пуст')
     return homework[0]
 
 
 def parse_status(homework: Dict[str, Any]) -> str:
     """Генерирует сообщение о статусе проверки работы."""
     homework_name = homework.get('homework_name')
-    status = homework.get('status')
-    verdict = HOMEWORK_VERDICTS.get(status)
 
     if not homework_name:
         raise TypeError('В ответе API домашки нет ключа `homework_name`')
 
+    status = homework.get('status')
     if status not in HOMEWORK_VERDICTS:
         raise KeyError(f'Недокументированный статус домашней работы: {status}')
 
+    verdict = HOMEWORK_VERDICTS.get(status)
     if not verdict:
         raise KeyError('Вердикт не опознан')
 
@@ -126,9 +126,6 @@ def main() -> None:
                 if check_response:
                     timestamp = response.get('current_date')
                 time.sleep(RETRY_PERIOD)
-    else:
-        time.sleep(RETRY_PERIOD)
-        main()
 
 
 if __name__ == '__main__':
